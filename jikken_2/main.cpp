@@ -22,7 +22,8 @@ vector<vector<double>> CalcOzscore(){
         double length=first.size();
 
         vector<vector<double>> consensus(4, vector<double>(length, 1)); //初期化ですべての表要素を１にする（最後の＋１不要）
-        
+        //cout<<consensus.size()<<endl;
+        //cout<<consensus[0].size()<<endl;
         //一行目の配列は、getlineしてfirstに格納してしまったので、一行目は別でやってあげる。
         
         for(int i=0; i<length; i++){
@@ -64,13 +65,13 @@ vector<vector<double>> CalcOzscore(){
         cout << "consensus" << endl;
         for(int i=0; i<4; i++){
             for(int j=0; j<length; j++){
-                cout<<consensus[i][j];
+                cout<<consensus[i][j]<<" ";
             }
             cout << endl;
         }
         
 
-    //３．コンセンサス表から、i番目に塩基A、、が出現する確率をprob表に。
+    //３．コンセンサス表から、i番目に塩基Xが出現する確率をprob表に。
         vector<vector<double>> prob(4, vector<double>(length, 0));
         for(int i = 0; i<4; i++){
             for(int j=0; j<length; j++){
@@ -86,10 +87,9 @@ vector<vector<double>> CalcOzscore(){
             for(int j=0; j<length; j++){
                 cout<<prob[i][j];
             }
-            cout << endl;
             cout << endl; 
         }
-
+        cout << endl;
 
     //４．塩基ｘのバックグラウンド出現確率q(x)を計算
         //出芽酵母の全ゲノムに含まれる塩基数
@@ -132,24 +132,25 @@ vector<vector<double>> CalcOzscore(){
 
 
     ifs.close();
-    return ozscore();
+    return ozscore;
 }
 
 //d.スコア行列を用いた結合部位の探索。別のfunctionを作る。
 double CalcHit(vector<vector<double>>ozscore, string sequence){
     double hit=0;
-
+  
     for(int j=0; j<sequence.size(); j++){
+        //cout << "a" << endl;
         if(sequence[j]=='A'){
             hit +=ozscore[0][j];
         }
-        else if(sequnece[j]='C'){
+        else if(sequence[j]=='C'){
             hit +=ozscore[1][j];
         }
-        else if(sequnece[j]='G'){
+        else if(sequence[j]=='G'){
             hit +=ozscore[2][j];
         }
-        else if(sequnece[j]='T'){
+        else if(sequence[j]=='T'){
             hit +=ozscore[3][j];
         }
     }
@@ -157,15 +158,46 @@ double CalcHit(vector<vector<double>>ozscore, string sequence){
     return hit;
 }
 
+
+string RunWindow(string promoter){
+    for(int i=0; i<promoter.size(); i++){
+        
+    }
+}
+
+
 int main(){
 
+    //プロモーターの名前、配列をvectorに書き込む。
+    ifstream ifs("../promoters");
+    if(!ifs){
+            cerr << "cant" << endl;
+            exit(1);
+    }
+
+    vector<string> promoters_set;
+    vector<string> promoters_names_set;
+
+    for(int i =0; i<8; i++){
+        string promo_name;
+        getline(ifs, promo_name);
+        promoters_names_set.push_back(promo_name);
+
+        string promoter;
+        getline(ifs, promoter);
+        promoters_set.push_back(promoter);
+    }
+
+    
     vector<vector<double>> ozscore;
-    CalcOzscore;
+    ozscore = CalcOzscore();
 
     string sequence = "AAAAAAAA";
-    CalcHit(ozscore, sequence);
+    double score =0;
+    score = CalcHit(ozscore, sequence);
+    cout << score << endl;
 
-//本来は転写因子ごとにozscore表を作成すので、fileも＆してretrieveするわ。
+//本来は転写因子ごとにozscore表を作成すので、fileも＆してretrieveするわ。けど関数の中で手動で変えて。
 
     return 0;
 }
