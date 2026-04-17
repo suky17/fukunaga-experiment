@@ -3,6 +3,10 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <cstdlib>
+#include <ctime> 
+#include <random>
+#include <algorithm> //sort用
 using namespace std;
 
 
@@ -158,15 +162,74 @@ double CalcHit(vector<vector<double>>ozscore, string sequence){
     return hit;
 }
 
+//position番号を保存しておけば、あとから配列はそのwindowの配列は取得できるので、一緒に保存しなくていい。
+struct Scores {
+    int position;
+    double score;
+};
 
-string RunWindow(string promoter){
-    for(int i=0; i<promoter.size(); i++){
-        
+//引数にozscoreを入れることで、その中の情報を使えるようになる。
+void RunWindow(string promoter, vector<vector<double>> ozscore,vector<double> &scores){
+    int length = ozscore[0].size();
+
+    for(int i = 0; i < promoter.size() - length + 1; i++){
+        //.substr(i番目から,n文字)　取得
+        string window = promoter.substr(i, length);
+        scores[i] = CalcHit(ozscore, window);
+    }
+}
+
+//ランダムに塩基配列を作る
+string RandomBase(double BaseLength, mt19937 mt, vector<vector<double>> ozscore){
+    string rand_sequence;
+    uniform_real_distribution<> dist(0,1);
+    
+    for(int i=0; i<BaseLength; i++){
+        //毎回新しいランダム値を出してもらう
+        double random = dist(mt);
+
+        if(random<0.25){
+            rand_sequence.push_back('A');
+        }
+        else if(random<0.50){
+            rand_sequence.push_back('C');
+        }
+        else if(random<0.75){
+            rand_sequence.push_back('G');
+        }
+        else if(random<1.0){
+            rand_sequence.push_back('T');
+        }
+    }
+    return rand_sequence;
+}
+
+void result_output(vector<string> promoters_set, vector<string> promoters_name_sets, vector<vector<double>> ozscore, double threshold){
+    for(int i=0; i<promoters_set.size(); i++){//複数のプロモーターがある
+        double score; 
+        int length = ozscore[0].size();
+        //一つのプロモーターについて。その文字列
+        for(int j = 0; j < promoters_set[i].size() - length + 1; j++){
+            //.substr(i番目から,n文字)　取得
+            string window = promoters_set[i].substr(j, length);
+            score = CalcHit(ozscore, window);
+            if(score > threshold){
+                cout << "Promoter name " << promoters_name_sets[i] << endl;
+                cout << "Sequence [" << window << "]  Score: " << score << endl;
+                cout << "Position " << j+1 << endl;
+                cout << endl;
+            }
+        }
+        cout << "/////////////////////" << endl;
     }
 }
 
 
+
 int main(){
+
+    //各モチーフに対してここは手動で変える。
+    cout << "Motif name: " << "MATa1" << endl;
 
     //プロモーターの名前、配列をvectorに書き込む。
     ifstream ifs("../promoters");
@@ -188,17 +251,43 @@ int main(){
         promoters_set.push_back(promoter);
     }
 
-    
+
+    //タンパク質に特有のozscore、ファイルのインポートはmainではなく、ozscoreで作る。
     vector<vector<double>> ozscore;
     ozscore = CalcOzscore();
 
-    string sequence = "AAAAAAAA";
-    double score =0;
-    score = CalcHit(ozscore, sequence);
-    cout << score << endl;
 
-//本来は転写因子ごとにozscore表を作成すので、fileも＆してretrieveするわ。けど関数の中で手動で変えて。
+    //ランダムの塩基配列を作る。
+    double BaseLength; 
+    cout << "Enter Base Length" << endl; 
+    cin >> BaseLength;
 
+
+    random_device rnd;
+    mt19937 mt(rnd());
+
+    string random_sequence;
+    random_sequence = RandomBase(BaseLength, mt, ozscore);
+    vector<double> Rand_scores(random_sequence.size());
+    /*random_sequnece配列にたいしてwindowを行って、score達だけを配列に保存。けどさっきの使うから、位置も保存されるわ。*/
+    RunWindow(random_sequence, ozscore, Rand_scores);
+    
+    //閾値を計算する
+    double pvalue; 
+    cout << "Enter p-value" << endl; 
+    cin >> pvalue;
+    cout << endl;
+
+    //random_sequnece配列についてwindowを回して得られたscoreをsortした、上からtop番目のscoreを閾値に設定。
+    sort(Rand_scores.begin(), Rand_scores.end());
+    reverse(Rand_scores.begin(), Rand_scores.end());
+    
+    int top;
+    top = pvalue*BaseLength;
+    
+    //閾値以上のものをDetThreshold行列に入れる。
+    double threshold = Rand_scores[top-1];
+    result_output(promoters_set,promoters_names_set,ozscore,threshold);
     return 0;
 }
 
