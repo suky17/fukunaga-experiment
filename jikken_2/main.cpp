@@ -65,8 +65,8 @@ vector<vector<double>> CalcOzscore(){
             seqcount++;
         }
 
-        //コンセンサ表を表示
-        cout << "consensus" << endl;
+        //頻度表を表示
+        cout << "frequnecy" << endl;
         for(int i=0; i<4; i++){
             for(int j=0; j<length; j++){
                 cout<<consensus[i][j]<<" ";
@@ -205,6 +205,8 @@ string RandomBase(double BaseLength, mt19937 mt, vector<vector<double>> ozscore)
 }
 
 void result_output(vector<string> promoters_set, vector<string> promoters_name_sets, vector<vector<double>> ozscore, double threshold){
+    cout << "Threshold: " << threshold << endl;
+    cout << endl;
     for(int i=0; i<promoters_set.size(); i++){//複数のプロモーターがある
         double score; 
         int length = ozscore[0].size();
@@ -220,7 +222,7 @@ void result_output(vector<string> promoters_set, vector<string> promoters_name_s
                 cout << endl;
             }
         }
-        cout << "/////////////////////" << endl;
+        cout << "---------------------------" << endl;
     }
 }
 
@@ -229,12 +231,12 @@ void result_output(vector<string> promoters_set, vector<string> promoters_name_s
 int main(){
 
     //各モチーフに対してここは手動で変える。
-    cout << "Motif name: " << "MATa1" << endl;
+    //cout << "Motif name: " << "filename" << endl;
 
     //プロモーターの名前、配列をvectorに書き込む。
     ifstream ifs("../promoters");
     if(!ifs){
-            cerr << "cant" << endl;
+            cerr << "cannot open file" << endl;
             exit(1);
     }
 
