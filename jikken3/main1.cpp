@@ -90,35 +90,50 @@ void DivideDataset(vector<vector<double>> dataset, vector<int> &labels, vector<v
     return;
 }
 
-void Evaluation(vector<vector<double>> test_dataset, vector<int> test_labels, double &test_ratio){
+void Evaluation(vector<vector<double>> test_dataset, vector<int> test_labels, TreeNode decision_tree, double &test_ratio){
     int test_number = test_ratio*10000;
-    int TP=0;
-    int FP=0;
-    int FN=0;
-    int TN =0;
-    //全てのラベルが１（可溶）と予測
-    int pred_label=1; 
+    double TP=0;
+    double FP=0;
+    double FN=0;
+    double TN =0;
+    
+    vector<int> pred_label(test_labels.size());
+
+    for(int i =0 ;i<test_labels.size(); i++){
+        if(test_dataset[i][decision_tree.feature_id] <= decision_tree.threshold){
+            //left 
+            pred_label[i]=decision_tree.left_class_id;
+        }
+        else if(test_dataset[i][decision_tree.feature_id] > decision_tree.threshold){
+            //right 
+            pred_label[i]=decision_tree.right_class_id;
+        }
+    }
+
     for(int i=0; i<test_number; i++){
-        if(test_labels[i]==1 && pred_label==1){
+        if(test_labels[i]==1 && pred_label[i]==1){
             TP++;
         }
-        else if(test_labels[i]==0 && pred_label==1){
+        else if(test_labels[i]==0 && pred_label[i]==1){
             FP++;
         }
-        else if(test_labels[i]==1 && pred_label==0){
+        else if(test_labels[i]==1 && pred_label[i]==0){
             FN++;
         }
-        else if(test_labels[i]==0 && pred_label==0){
+        else if(test_labels[i]==0 && pred_label[i]==0){
             TN++;
         }
     }
 
     //intで定義してるから、計算はdoubleで行ってね。
     double accuracy=(TP+TN)/(TP+FP+FN+TN);
-    double precision=(double)TP/((double)TP+(double)FP);
-    double recall=(double)TP/((double)TP+(double)FN);
+    double precision=TP/(TP+FP);
+    double recall=TP/(TP+FN);
     double f_score=(2*precision*recall)/(recall+precision);
 
+    cout << test_number << endl;
+    cout << TP << " " << FP << " " << FN << " " << TN << endl;
+    cout << accuracy << " " << precision << " " << recall << endl;
     cout << "f-score: " << f_score << endl;
 
 }
@@ -212,8 +227,9 @@ void TrainDecisionNode(vector<vector<double>> training_dataset, vector<int> &tra
             }
         }
     }
-    cout << decision_tree.feature_id << " " << decision_tree.threshold << endl;
-
+    
+    cout <<"ジニ不純度が最も小さくなる最適な特徴量：" << decision_tree.feature_id << " この時の閾値：" << decision_tree.threshold << endl;
+    cout << "左に割り振られたデータラベルの最頻値：" << decision_tree.left_class_id << "　右に割り振られたデータラベルの最頻値："<< decision_tree.right_class_id << endl;
 }
 
 
@@ -238,11 +254,11 @@ int main(void){
 
     DivideDataset(dataset, labels, training_dataset, training_labels, test_dataset, test_labels, test_ratio);
 
-    Evaluation(test_dataset, test_labels, test_ratio);
-
-
     TreeNode decision_tree;
     TrainDecisionNode(training_dataset, training_labels, decision_tree);
+
+    Evaluation(test_dataset, test_labels, decision_tree, test_ratio);
+
 
     return 0;
 }
