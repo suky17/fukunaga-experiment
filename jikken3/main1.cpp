@@ -131,9 +131,9 @@ void Evaluation(vector<vector<double>> test_dataset, vector<int> test_labels, Tr
     double recall=TP/(TP+FN);
     double f_score=(2*precision*recall)/(recall+precision);
 
-    cout << test_number << endl;
-    cout << TP << " " << FP << " " << FN << " " << TN << endl;
-    cout << accuracy << " " << precision << " " << recall << endl;
+    cout << endl;
+    //cout << TP << " " << FP << " " << FN << " " << TN << endl;
+    cout << "Accuracy: " << accuracy << " Precision: " << precision << " Recall: " << recall << endl;
     cout << "f-score: " << f_score << endl;
 
 }
@@ -228,8 +228,8 @@ void TrainDecisionNode(vector<vector<double>> training_dataset, vector<int> &tra
         }
     }
     
-    cout <<"ジニ不純度が最も小さくなる最適な特徴量：" << decision_tree.feature_id << " この時の閾値：" << decision_tree.threshold << endl;
-    cout << "左に割り振られたデータラベルの最頻値：" << decision_tree.left_class_id << "　右に割り振られたデータラベルの最頻値："<< decision_tree.right_class_id << endl;
+    cout <<"ジニ不純度が最も小さくなる最適な特徴量：" << decision_tree.feature_id << " 閾値：" << decision_tree.threshold << endl;
+    cout << "left_class_id: " << decision_tree.left_class_id << " right_class_id: "<< decision_tree.right_class_id << endl;
 }
 
 

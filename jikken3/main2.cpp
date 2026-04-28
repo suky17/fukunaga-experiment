@@ -92,7 +92,7 @@ void DivideDataset(vector<vector<double>> dataset, vector<int> &labels, vector<v
 }
 
 //テストデータを流し込んで、閾値をもととに左か右かで判定していくシステム。
-void Evaluation(vector<TreeNode> decision_tree, vector<vector<double>> test_dataset, vector<int> test_labels, double &test_ratio){
+void Evaluation(vector<TreeNode> &decision_tree, vector<vector<double>> test_dataset, vector<int> test_labels, double &test_ratio){
     int test_number = test_ratio*10000;
     double TP=0;
     double FP=0;
@@ -129,7 +129,16 @@ void Evaluation(vector<TreeNode> decision_tree, vector<vector<double>> test_data
             }
         }
     }                                               
-
+    //intで定義してるから、計算はdoubleで行ってね。
+    double accuracy=(TP+TN)/(TP+FP+FN+TN);
+    double precision=TP/(TP+FP);
+    double recall=TP/(TP+FN);
+    double f_score=(2*precision*recall)/(recall+precision);
+    
+    cout << endl;
+    //cout << TP << " " << FP << " " << FN << " " << TN << endl;
+    cout << "Accuracy: " << accuracy << " Precision: " << precision << " Recall: " << recall << endl;
+    cout << "f-score: " << f_score << endl;
 }
 
 
@@ -221,15 +230,14 @@ void TrainDecisionNode(vector<vector<double>> training_dataset, vector<int> trai
             }
         }
     }
-    
-    cout <<"ジニ不純度が最も小さくなる最適な特徴量：" << decision_tree.feature_id << " この時の閾値：" << decision_tree.threshold << endl;
-    cout << "左に割り振られたデータラベルの最頻値：" << decision_tree.left_class_id << " 右に割り振られたデータラベルの最頻値："<< decision_tree.right_class_id << endl;
+    cout <<"ジニ不純度が最も小さくなる最適な特徴量：" << decision_tree.feature_id << " 閾値：" << decision_tree.threshold << endl;
+    cout << "left_class_id: " << decision_tree.left_class_id << " right_class_id: "<< decision_tree.right_class_id << endl;
     cout << endl;
 }
 
 
 
-void TrainDecisionTree(vector<vector<double>> training_dataset, vector<int> training_labels, vector<TreeNode> decision_tree){
+void TrainDecisionTree(vector<vector<double>> training_dataset, vector<int> training_labels, vector<TreeNode> &decision_tree){
     //この中でTraindecisionnodeを3回呼び出す                
     TrainDecisionNode(training_dataset, training_labels, decision_tree[0]);
 
@@ -266,7 +274,7 @@ int main(void){
     vector<string> feature_name(NUM_FEATURES, "");
     vector<vector<double>> dataset(NUM_SEQS, vector<double>(NUM_FEATURES, 0.0));
     vector<int> labels(NUM_SEQS);
-2
+    
     //○○＝になってないから返り値が無いことが分かる。
     LoadSolubilityFile("protein_solubility_dataset.txt", feature_name, dataset, labels);
 
